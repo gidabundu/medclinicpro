@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="qrGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a2b4b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="url(#qrGradient)"/>
+  <!-- QR Code Pattern -->
+  <g fill="white">
+    <!-- Top Left Corner -->
+    <rect x="8" y="8" width="20" height="20" rx="2"/>
+    <rect x="12" y="12" width="12" height="12" rx="1" fill="#1a2b4b"/>
+    <rect x="14" y="14" width="8" height="8" rx="1" fill="white"/>
+    
+    <!-- Top Right Corner -->
+    <rect x="36" y="8" width="20" height="20" rx="2"/>
+    <rect x="40" y="12" width="12" height="12" rx="1" fill="#1a2b4b"/>
+    <rect x="42" y="14" width="8" height="8" rx="1" fill="white"/>
+    
+    <!-- Bottom Left Corner -->
+    <rect x="8" y="36" width="20" height="20" rx="2"/>
+    <rect x="12" y="40" width="12" height="12" rx="1" fill="#1a2b4b"/>
+    <rect x="14" y="42" width="8" height="8" rx="1" fill="white"/>
+    
+    <!-- Center Pattern -->
+    <rect x="36" y="36" width="8" height="8" rx="1"/>
+    <rect x="46" y="36" width="8" height="8" rx="1"/>
+    <rect x="36" y="46" width="8" height="8" rx="1"/>
+    <rect x="46" y="46" width="8" height="8" rx="1"/>
+    
+    <!-- Scan Line -->
+    <line x1="8" y1="32" x2="56" y2="32" stroke="#3b82f6" stroke-width="2" opacity="0.6"/>
+  </g>
+</svg>
