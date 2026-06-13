@@ -373,6 +373,7 @@ function loadFallbackQR() {
   @media (max-width: 1024px) {
     .stats-grid{grid-template-columns:repeat(2,1fr)}
     .dashboard-grid{grid-template-columns:1fr 280px}
+    .booking-grid{grid-template-columns:1fr;gap:16px}
   }
 
   @media (max-width: 768px) {
@@ -396,6 +397,9 @@ function loadFallbackQR() {
     .calendar-day{min-height:60px;padding:4px}
     .calendar-day-header{font-size:10px;padding:6px 2px}
     .calendar-day-number{font-size:11px}
+    .reg-grid{grid-template-columns:1fr;gap:16px}
+    .input-row{grid-template-columns:1fr}
+    .header-right{margin-left:auto;justify-content:flex-end}
   }
 
   @media (max-width: 480px) {
@@ -513,6 +517,7 @@ function loadFallbackQR() {
       </button>
       <div class="nav-item-sm" onclick="openSupportModal()"><i class="ti ti-help-circle"></i> Support</div>
       <div class="nav-item-sm" onclick="openSettingsModal()"><i class="ti ti-settings"></i> Settings</div>
+      <div class="nav-item-sm" onclick="logout()"><i class="ti ti-logout" style="color:var(--red)"></i> Logout</div>
     </div>
   </aside>
 
@@ -3469,6 +3474,17 @@ function editPatient() {
   closePatientInfoModal();
   showPage('patients');
   showToast('Patient data loaded for editing');
+}
+
+// Logout function
+async function logout() {
+  try {
+    const apiBase = window.location.origin;
+    await fetch(`${apiBase}/api/logout`, { method: 'POST', credentials: 'include' });
+    window.location.href = 'login.html';
+  } catch (err) {
+    alert('Error logging out');
+  }
 }
 
 // Helper function to calculate age
