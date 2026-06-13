@@ -1,7 +1,14 @@
+const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
 const dbFile = process.env.DB_PATH || path.join(__dirname, 'medclinic.db');
+// Ensure the directory exists to avoid SQLITE_CANTOPEN errors
+const dbDir = path.dirname(dbFile);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
 const db = new sqlite3.Database(dbFile);
 
 // Helper function to run queries using promises
