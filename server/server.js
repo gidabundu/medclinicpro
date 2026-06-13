@@ -277,6 +277,19 @@ app.put('/api/users/:id/status', requireAuth, requireRole(['Admin']), async (req
   }
 });
 
+app.delete('/api/users/:id', requireAuth, requireRole(['Admin']), async (req, res) => {
+  try {
+    // Prevent admin from deleting themselves
+    if (req.user.id === parseInt(req.params.id)) {
+      return res.status(400).json({ error: 'Cannot delete your own account' });
+    }
+    await dbRun('DELETE FROM users WHERE id = ?', [req.params.id]);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // --- CLINIC DATA ENDPOINTS ---
 
 // GET stats
