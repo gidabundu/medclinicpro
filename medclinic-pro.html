@@ -3581,7 +3581,7 @@ async function loadUsers() {
             <button onclick="deleteUser(${u.id}, '${u.name}')" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;" title="Delete User">
               <i class="ti ti-trash"></i>
             </button>
-          ` : ''}
+          ` : '<span style="color:var(--gray-400);font-size:11px;font-weight:600;">(Current User)</span>'}
         </td>
       </tr>
     `).join('');
