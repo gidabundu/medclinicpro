@@ -1727,12 +1727,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addStaffBtn = document.querySelector('#page-staff .btn-link');
     if (addStaffBtn) addStaffBtn.setAttribute('onclick', 'openStaffModal()');
 
-    document.querySelectorAll('.header-user').forEach(el => {
-      el.style.cursor = 'pointer';
-      el.setAttribute('title', 'Click to log out');
-      el.addEventListener('click', logout);
-    });
-
     // Populate initial calendar and load dashboard
     updateSlotsDate(selectedDay);
     loadPageData('dashboard');
