@@ -33,7 +33,9 @@
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
-      const apiBase = window.location.origin;
+      const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? window.location.origin
+        : 'https://medclinicpro.onrender.com';
       try{
         const res = await fetch(`${apiBase}/api/login`,{
           method:'POST',

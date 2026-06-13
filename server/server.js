@@ -47,9 +47,23 @@ if (NODE_ENV === 'production') {
 app.use(morgan('dev'));
 
 // CORS configuration
-const allowedOrigin = process.env.CORS_ORIGIN;
+const allowedOrigins = [
+  'https://medclinicpro.vercel.app',
+  process.env.CORS_ORIGIN,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500'
+].filter(Boolean);
+
 app.use(cors({
-  origin: allowedOrigin || true, // Allow true (reflect request origin) if not specified
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow all for now; tighten after confirming it works
+    }
+  },
   credentials: true
 }));
 

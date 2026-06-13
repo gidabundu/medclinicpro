@@ -26,7 +26,9 @@
       if(!/[A-Z]/.test(password)){alert('Password must contain at least one uppercase letter');return;}
       if(!/[a-z]/.test(password)){alert('Password must contain at least one lowercase letter');return;}
       if(!/[0-9]/.test(password)){alert('Password must contain at least one number');return;}
-      const apiBase = window.location.origin;
+      const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? window.location.origin
+        : 'https://medclinicpro.onrender.com';
       try{
         const res = await fetch(`${apiBase}/api/signup`,{
           method:'POST',

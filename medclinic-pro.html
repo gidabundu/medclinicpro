@@ -463,6 +463,10 @@ function loadFallbackQR() {
 </head>
 <body>
 <script>
+  const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? window.location.origin
+    : 'https://medclinicpro.onrender.com';
+
   window.currentUser = null;
   function applyUserUI() {
     if (!window.currentUser) return;
@@ -486,7 +490,7 @@ function loadFallbackQR() {
   (async function(){
     try{
       document.documentElement.style.display = 'none';
-      const apiBase = window.location.origin;
+      const apiBase = API_BASE;
       const res = await fetch(`${apiBase}/api/me`, { credentials: 'include' });
       if(!res.ok){
         window.location.href = 'login.html';
@@ -1664,7 +1668,7 @@ function loadFallbackQR() {
 
 <script>
 const pages = ['dashboard','appointments','patients','staff','visits','vaccinations','inventory'];
-const apiBase = window.location.origin;
+const apiBase = API_BASE;
 
 // Data caches
 let currentStaffList = [];
@@ -1691,7 +1695,7 @@ async function apiFetch(endpoint, options = {}) {
     options.headers['Content-Type'] = 'application/json';
     options.body = JSON.stringify(options.body);
   }
-  const res = await fetch(`${apiBase}${endpoint}`, options);
+  const res = await fetch(`${API_BASE}${endpoint}`, options);
   if (res.status === 401) {
     window.location.href = 'login.html';
     return null;
@@ -3541,7 +3545,7 @@ function editPatient() {
 // Users API Functions
 async function loadUsers() {
   try {
-    const apiBase = window.location.origin;
+    const apiBase = API_BASE;
     const res = await fetch(`${apiBase}/api/users`, { credentials: 'include' });
     if (!res.ok) throw new Error('Failed to load users');
     const users = await res.json();
@@ -3582,7 +3586,7 @@ async function loadUsers() {
 
 async function updateUserRole(userId, newRole) {
   try {
-    const apiBase = window.location.origin;
+    const apiBase = API_BASE;
     const res = await fetch(`${apiBase}/api/users/${userId}/role`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -3599,7 +3603,7 @@ async function updateUserRole(userId, newRole) {
 
 async function updateUserStatus(userId, newStatus) {
   try {
-    const apiBase = window.location.origin;
+    const apiBase = API_BASE;
     const res = await fetch(`${apiBase}/api/users/${userId}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -3617,7 +3621,7 @@ async function updateUserStatus(userId, newStatus) {
 // Logout function
 async function logout() {
   try {
-    const apiBase = window.location.origin;
+    const apiBase = API_BASE;
     await fetch(`${apiBase}/api/logout`, { method: 'POST', credentials: 'include' });
     window.location.href = 'login.html';
   } catch (err) {
