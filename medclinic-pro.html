@@ -3578,8 +3578,8 @@ async function loadUsers() {
         <td style="padding:12px 10px;font-size:12px;color:var(--gray-500);">${new Date(u.createdAt).toLocaleDateString()}</td>
         <td style="padding:12px 10px;">
           ${u.id !== window.currentUser.id ? `
-            <button onclick="deleteUser(${u.id}, '${u.name}')" style="background:none;border:none;color:var(--red);cursor:pointer;padding:4px;" title="Delete User">
-              <i class="ti ti-trash"></i>
+            <button onclick="deleteUser(${u.id}, '${u.name}')" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:4px;cursor:pointer;padding:4px 10px;font-size:12px;font-weight:bold;" title="Delete User">
+              <i class="ti ti-trash" style="margin-right:4px;"></i>Delete
             </button>
           ` : '<span style="color:var(--gray-400);font-size:11px;font-weight:600;">(Current User)</span>'}
         </td>
