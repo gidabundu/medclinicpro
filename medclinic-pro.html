@@ -411,6 +411,50 @@ function loadFallbackQR() {
     .content{padding:16px}
     .stat-card{padding:14px 16px}
   }
+
+  /* PRINT STYLES */
+  @media print {
+    .sidebar, .header, .btn-new-appt, .nav-item-sm, .modal-close, .modal-footer button:not([onclick*="print"]) {
+      display: none !important;
+    }
+    .modal-overlay {
+      position: static !important;
+      background: white !important;
+    }
+    .modal {
+      position: static !important;
+      width: 100% !important;
+      max-width: none !important;
+      box-shadow: none !important;
+      border: none !important;
+    }
+    .modal-header {
+      display: none !important;
+    }
+    .modal-body {
+      padding: 0 !important;
+    }
+    .modal-footer {
+      display: none !important;
+    }
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    .content {
+      padding: 0 !important;
+      overflow: visible !important;
+    }
+    .page {
+      display: none !important;
+    }
+    #patientInfoModal {
+      display: block !important;
+    }
+    #patientInfoModal .modal {
+      display: block !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1528,6 +1572,7 @@ function loadFallbackQR() {
     </div>
     <div class="modal-footer">
       <button class="btn-secondary" onclick="closePatientInfoModal()">Close</button>
+      <button class="btn-secondary" onclick="printPatientInfo()"><i class="ti ti-printer" style="margin-right:6px;font-size:14px"></i>Print</button>
       <button class="btn-primary" onclick="editPatient()">Edit Patient</button>
     </div>
   </div>
@@ -3284,6 +3329,112 @@ async function loadPatientInfo(patientId) {
     content.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red)">Failed to load patient information</div>';
     console.error('Error loading patient info:', err);
   }
+}
+
+function printPatientInfo() {
+  if (!currentPatientId) return;
+  
+  const patient = currentPatientsList.find(p => p.PatientID === currentPatientId);
+  if (!patient) {
+    showToast('Patient not found');
+    return;
+  }
+
+  // Get the patient info content
+  const content = document.getElementById('patientInfoContent').innerHTML;
+  
+  // Create a print-friendly version
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Patient Information - ${escapeHtml(patient.FullName)}</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          font-size: 12px;
+          line-height: 1.6;
+          color: #333;
+          max-width: 800px;
+          margin: 20px auto;
+          padding: 20px;
+        }
+        .header {
+          text-align: center;
+          border-bottom: 2px solid #1a2b4b;
+          padding-bottom: 20px;
+          margin-bottom: 20px;
+        }
+        .header h1 {
+          color: #1a2b4b;
+          margin: 0;
+          font-size: 24px;
+        }
+        .header p {
+          color: #666;
+          margin: 5px 0 0;
+          font-size: 14px;
+        }
+        .section {
+          background: #f8f9fa;
+          padding: 15px;
+          border-radius: 8px;
+          margin-bottom: 15px;
+          page-break-inside: avoid;
+        }
+        .section h3 {
+          color: #1a2b4b;
+          margin: 0 0 10px;
+          font-size: 16px;
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 5px;
+        }
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+        .info-item {
+          margin-bottom: 5px;
+        }
+        .info-item strong {
+          color: #1a2b4b;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 30px;
+          padding-top: 20px;
+          border-top: 1px solid #ddd;
+          color: #666;
+          font-size: 11px;
+        }
+        @media print {
+          body {
+            margin: 0;
+            padding: 10px;
+          }
+          .section {
+            page-break-inside: avoid;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>MedClinic Pro - Patient Information</h1>
+        <p>Generated on ${new Date().toLocaleString()}</p>
+      </div>
+      ${content.replace(/style="[^"]*"/g, '').replace(/class="[^"]*"/g, '')}
+      <div class="footer">
+        <p>This document is confidential and intended for medical use only.</p>
+        <p>MedClinic Pro - Clinic Management System</p>
+      </div>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.print();
 }
 
 function editPatient() {

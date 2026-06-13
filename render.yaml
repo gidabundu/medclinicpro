@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: medclinic-server
+    env: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://<your-vercel-domain.vercel.app>
+      - key: DB_PATH
+        value: /opt/render/project/src/server/data/medclinic.db
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/server/data
+      sizeGB: 1

@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const dbFile = path.join(__dirname, 'medclinic.db');
+const dbFile = process.env.DB_PATH || path.join(__dirname, 'medclinic.db');
 const db = new sqlite3.Database(dbFile);
 
 // Helper function to run queries using promises
