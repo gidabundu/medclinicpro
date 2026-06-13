@@ -463,6 +463,7 @@ function loadFallbackQR() {
 </head>
 <body>
 <script>
+  window.currentUser = null;
   (async function(){
     try{
       document.documentElement.style.display = 'none';
@@ -472,12 +473,36 @@ function loadFallbackQR() {
         window.location.href = 'login.html';
         return;
       }
+      const data = await res.json();
+      window.currentUser = data.user;
       document.documentElement.style.display = 'block';
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        if (window.currentUser.status !== 'Active' && window.currentUser.role !== 'Admin') {
+          document.querySelector('.app').style.display = 'none';
+          document.getElementById('pending-screen').style.display = 'flex';
+        } else {
+          document.querySelectorAll('.header-user-name').forEach(el => el.textContent = window.currentUser.name);
+          document.querySelectorAll('.header-user-role').forEach(el => el.textContent = window.currentUser.role || 'Staff');
+          if (window.currentUser.name) {
+            document.querySelectorAll('.avatar').forEach(el => el.textContent = window.currentUser.name.substring(0,2).toUpperCase());
+          }
+          if (window.currentUser.role === 'Admin') {
+            document.getElementById('nav-users').style.display = 'flex';
+          }
+        }
+      });
     }catch(e){
       window.location.href = 'login.html';
     }
   })();
 </script>
+<div id="pending-screen" style="display:none;height:100vh;align-items:center;justify-content:center;flex-direction:column;background:#f3f4f6;text-align:center;padding:20px;">
+  <i class="ti ti-lock" style="font-size:48px;color:var(--navy);margin-bottom:16px;"></i>
+  <h2 style="color:var(--gray-900);margin-bottom:8px;">Account Pending Approval</h2>
+  <p style="color:var(--gray-600);margin-bottom:24px;max-width:400px;">Your account has been created successfully but requires administrator approval before you can access the system.</p>
+  <button style="padding:10px 20px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;" onclick="logout()">Logout</button>
+</div>
 <div class="app">
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -509,6 +534,9 @@ function loadFallbackQR() {
       </a>
       <a class="nav-item" onclick="showPage('inventory',this)">
         <i class="ti ti-clipboard-list"></i> Inventory
+      </a>
+      <a class="nav-item" id="nav-users" style="display:none" onclick="showPage('users',this)">
+        <i class="ti ti-user-shield"></i> User Management
       </a>
     </nav>
     <div class="sidebar-bottom">
@@ -624,6 +652,30 @@ function loadFallbackQR() {
     </header>
 
     <div class="content">
+
+      <!-- USERS PAGE -->
+      <div class="page" id="page-users">
+        <div class="page-title">User Management</div>
+        <div class="form-card" style="padding:24px;max-width:1000px">
+          <p style="font-size:13px;color:var(--gray-600);margin-bottom:16px">Manage system access, approve new registrations, and assign roles to staff members.</p>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;min-width:600px;">
+              <thead>
+                <tr style="border-bottom:2px solid var(--gray-200);text-align:left;color:var(--gray-700);font-size:13px;">
+                  <th style="padding:12px 10px;">Name</th>
+                  <th style="padding:12px 10px;">Email</th>
+                  <th style="padding:12px 10px;">Role</th>
+                  <th style="padding:12px 10px;">Status</th>
+                  <th style="padding:12px 10px;">Joined</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--gray-500)">Loading users...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       <!-- DASHBOARD PAGE -->
       <div class="page active" id="page-dashboard">
@@ -1832,6 +1884,7 @@ function loadPageData(name) {
   else if (name === 'visits') loadVisitsPageData();
   else if (name === 'vaccinations') loadVaccinationsPageData();
   else if (name === 'inventory') loadInventoryPageData();
+  else if (name === 'users') loadUsers();
 }
 
 // --- DASHBOARD DATA ---
@@ -3474,6 +3527,82 @@ function editPatient() {
   closePatientInfoModal();
   showPage('patients');
   showToast('Patient data loaded for editing');
+}
+
+// Users API Functions
+async function loadUsers() {
+  try {
+    const apiBase = window.location.origin;
+    const res = await fetch(`${apiBase}/api/users`, { credentials: 'include' });
+    if (!res.ok) throw new Error('Failed to load users');
+    const users = await res.json();
+    const tbody = document.getElementById('users-table-body');
+    if (users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">No users found</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = users.map(u => `
+      <tr style="border-bottom:1px solid var(--gray-200);">
+        <td style="padding:12px 10px;font-weight:600;color:var(--gray-800);">${u.name}</td>
+        <td style="padding:12px 10px;font-size:13px;color:var(--gray-600);">${u.email}</td>
+        <td style="padding:12px 10px;">
+          <select style="padding:6px;border:1px solid var(--gray-300);border-radius:4px;font-size:12px;" onchange="updateUserRole(${u.id}, this.value)" ${u.id === window.currentUser.id ? 'disabled' : ''}>
+            <option value="Pending" ${u.role === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin</option>
+            <option value="Doctor" ${u.role === 'Doctor' ? 'selected' : ''}>Doctor</option>
+            <option value="Nurse" ${u.role === 'Nurse' ? 'selected' : ''}>Nurse</option>
+            <option value="Receptionist" ${u.role === 'Receptionist' ? 'selected' : ''}>Receptionist</option>
+          </select>
+        </td>
+        <td style="padding:12px 10px;">
+          <select style="padding:6px;border:1px solid var(--gray-300);border-radius:4px;font-size:12px;" onchange="updateUserStatus(${u.id}, this.value)" ${u.id === window.currentUser.id ? 'disabled' : ''}>
+            <option value="Pending" ${u.status === 'Pending' ? 'selected' : ''}>Pending</option>
+            <option value="Active" ${u.status === 'Active' ? 'selected' : ''}>Active</option>
+            <option value="Suspended" ${u.status === 'Suspended' ? 'selected' : ''}>Suspended</option>
+          </select>
+        </td>
+        <td style="padding:12px 10px;font-size:12px;color:var(--gray-500);">${new Date(u.createdAt).toLocaleDateString()}</td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error(err);
+    document.getElementById('users-table-body').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:red;">Error loading users</td></tr>';
+  }
+}
+
+async function updateUserRole(userId, newRole) {
+  try {
+    const apiBase = window.location.origin;
+    const res = await fetch(`${apiBase}/api/users/${userId}/role`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ role: newRole })
+    });
+    if (!res.ok) throw new Error('Failed to update role');
+    showToast('User role updated');
+  } catch (err) {
+    alert('Error updating user role');
+    loadUsers();
+  }
+}
+
+async function updateUserStatus(userId, newStatus) {
+  try {
+    const apiBase = window.location.origin;
+    const res = await fetch(`${apiBase}/api/users/${userId}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) throw new Error('Failed to update status');
+    showToast('User status updated');
+  } catch (err) {
+    alert('Error updating user status');
+    loadUsers();
+  }
 }
 
 // Logout function

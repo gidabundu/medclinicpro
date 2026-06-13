@@ -49,8 +49,22 @@ const initDb = async () => {
     name TEXT,
     email TEXT UNIQUE,
     password TEXT,
+    role TEXT DEFAULT 'Pending',
+    status TEXT DEFAULT 'Pending',
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+
+  // Add role and status columns to existing users table
+  try {
+    await dbRun(`ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'Pending'`);
+  } catch (err) {
+    // Column already exists
+  }
+  try {
+    await dbRun(`ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'Pending'`);
+  } catch (err) {
+    // Column already exists
+  }
 
   // Patients table
   await dbRun(`CREATE TABLE IF NOT EXISTS Patients (

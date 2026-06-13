@@ -82,7 +82,7 @@ app.use('/api/signup', authLimiter);
 
 // JWT token generator
 function generateToken(user) {
-  return jwt.sign({ id: user.id, email: user.email, name: user.name }, SECRET, { expiresIn: '7d' });
+  return jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role, status: user.status }, SECRET, { expiresIn: '7d' });
 }
 
 // Authentication middleware using HTTP-Only Cookie
@@ -92,9 +92,20 @@ const requireAuth = (req, res, next) => {
 
   jwt.verify(token, SECRET, (err, decoded) => {
     if (err) return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    
+    // Allow access to /api/me, /api/logout regardless of status
+    if (req.path !== '/api/me' && req.path !== '/api/logout' && decoded.status !== 'Active' && decoded.role !== 'Admin') {
+      return res.status(403).json({ error: 'Account pending approval' });
+    }
+    
     req.user = decoded;
     next();
   });
+};
+
+const requireRole = (roles) => (req, res, next) => {
+  if (!roles.includes(req.user.role)) return res.status(403).json({ error: 'Forbidden: Insufficient role' });
+  next();
 };
 
 // --- AUTHENTICATION ENDPOINTS ---
@@ -120,10 +131,15 @@ app.post('/api/signup', async (req, res) => {
     const row = await dbGet('SELECT id FROM users WHERE email = ?', [email]);
     if (row) return res.status(400).json({ error: 'User already exists' });
 
+    const countRow = await dbGet('SELECT COUNT(*) as count FROM users');
+    const isFirstUser = countRow.count === 0;
+    const role = isFirstUser ? 'Admin' : 'Pending';
+    const status = isFirstUser ? 'Active' : 'Pending';
+
     const hash = await bcrypt.hash(password, 10);
-    const result = await dbRun('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [sanitizedName, email, hash]);
+    const result = await dbRun('INSERT INTO users (name, email, password, role, status) VALUES (?, ?, ?, ?, ?)', [sanitizedName, email, hash, role, status]);
     
-    const user = { id: result.lastID, name: name || '', email };
+    const user = { id: result.lastID, name: name || '', email, role, status };
     const token = generateToken(user);
 
     res.cookie('med_token', token, {
@@ -176,9 +192,40 @@ app.post('/api/logout', (req, res) => {
 
 app.get('/api/me', requireAuth, async (req, res) => {
   try {
-    const user = await dbGet('SELECT id, name, email, createdAt FROM users WHERE id = ?', [req.user.id]);
+    const user = await dbGet('SELECT id, name, email, role, status, createdAt FROM users WHERE id = ?', [req.user.id]);
     if (!user) return res.status(404).json({ error: 'User not found' });
     res.json({ user });
+  } catch (e) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// --- USER MANAGEMENT ENDPOINTS ---
+
+app.get('/api/users', requireAuth, requireRole(['Admin']), async (req, res) => {
+  try {
+    const users = await dbAll('SELECT id, name, email, role, status, createdAt FROM users ORDER BY createdAt DESC');
+    res.json(users);
+  } catch (e) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+app.put('/api/users/:id/role', requireAuth, requireRole(['Admin']), async (req, res) => {
+  try {
+    const { role } = req.body;
+    await dbRun('UPDATE users SET role = ? WHERE id = ?', [role, req.params.id]);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+app.put('/api/users/:id/status', requireAuth, requireRole(['Admin']), async (req, res) => {
+  try {
+    const { status } = req.body;
+    await dbRun('UPDATE users SET status = ? WHERE id = ?', [status, req.params.id]);
+    res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: 'Database error' });
   }
