@@ -589,16 +589,17 @@ function loadFallbackQR() {
     </header>
 
     <!-- HEADER for appointments -->
-    <header class="header" id="header-appointments" style="display:none">
-      <div class="header-search">
-        <i class="ti ti-search"></i>
-        <input type="text" placeholder="Search patients, doctors...">
+    <header class="top-header" id="header-appointments" style="display:none">
+      <div class="search-bar">
+        <i class="ti ti-search" style="color:var(--gray-400)"></i>
+        <input type="text" placeholder="Search patients, appointments, staff...">
       </div>
-      <div class="header-right">
-        <div class="header-icon-btn"><i class="ti ti-refresh" style="font-size:16px"></i></div>
-        <div class="header-icon-btn"><i class="ti ti-bell" style="font-size:16px"></i><div class="notif-dot"></div></div>
-        <div class="header-icon-btn"><i class="ti ti-settings" style="font-size:16px"></i></div>
-        <div class="header-user">
+      <div class="header-actions">
+        <div class="action-btn">
+          <i class="ti ti-bell"></i>
+          <div class="badge">3</div>
+        </div>
+        <div class="user-profile">
           <div class="header-user-info">
             <div class="header-user-name">Nurse Marie</div>
             <div class="header-user-role">Shift Supervisor</div>
@@ -1667,7 +1668,7 @@ function loadFallbackQR() {
 </div>
 
 <script>
-const pages = ['dashboard','appointments','patients','staff','visits','vaccinations','inventory'];
+const pages = ['dashboard','appointments','patients','staff','visits','vaccinations','inventory','users'];
 const apiBase = API_BASE;
 
 // Data caches
