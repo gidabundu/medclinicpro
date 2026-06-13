@@ -144,8 +144,8 @@ app.post('/api/signup', async (req, res) => {
 
     res.cookie('med_token', token, {
       httpOnly: true,
-      secure: NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true,
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -181,8 +181,8 @@ app.post('/api/login', async (req, res) => {
 
     res.cookie('med_token', token, {
       httpOnly: true,
-      secure: NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: true,
+      sameSite: 'none',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -220,8 +220,8 @@ app.get('/api/me', requireAuth, async (req, res) => {
       const token = generateToken(user);
       res.cookie('med_token', token, {
         httpOnly: true,
-        secure: NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: true,
+        sameSite: 'none',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       });
     }
