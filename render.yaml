@@ -13,7 +13,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        value: https://<your-vercel-domain.vercel.app>
+        value: https://medclinicpro.vercel.app
       - key: DB_PATH
         value: /opt/render/project/src/server/data/medclinic.db
     disk:
