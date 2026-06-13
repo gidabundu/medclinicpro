@@ -48,12 +48,8 @@ app.use(morgan('dev'));
 
 // CORS configuration
 const allowedOrigin = process.env.CORS_ORIGIN;
-if (!allowedOrigin && NODE_ENV === 'production') {
-  console.error('FATAL: CORS_ORIGIN environment variable is required in production');
-  process.exit(1);
-}
 app.use(cors({
-  origin: allowedOrigin || (NODE_ENV === 'development' ? 'http://localhost:3000' : false),
+  origin: allowedOrigin || true, // Allow true (reflect request origin) if not specified
   credentials: true
 }));
 
