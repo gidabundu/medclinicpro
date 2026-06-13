@@ -170,6 +170,13 @@ app.post('/api/login', async (req, res) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ error: 'Invalid credentials' });
 
+    // Bootstrap fallback for existing users: make first user Admin automatically
+    if (user.id === 1 && user.role !== 'Admin') {
+      await dbRun("UPDATE users SET role = 'Admin', status = 'Active' WHERE id = 1");
+      user.role = 'Admin';
+      user.status = 'Active';
+    }
+
     const token = generateToken(user);
 
     res.cookie('med_token', token, {
@@ -194,6 +201,31 @@ app.get('/api/me', requireAuth, async (req, res) => {
   try {
     const user = await dbGet('SELECT id, name, email, role, status, createdAt FROM users WHERE id = ?', [req.user.id]);
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    let tokenNeedsRefresh = false;
+
+    // Bootstrap fallback for existing users: make first user Admin automatically
+    if (user.id === 1 && user.role !== 'Admin') {
+      await dbRun("UPDATE users SET role = 'Admin', status = 'Active' WHERE id = 1");
+      user.role = 'Admin';
+      user.status = 'Active';
+      tokenNeedsRefresh = true;
+    }
+
+    if (req.user.role !== user.role || req.user.status !== user.status) {
+      tokenNeedsRefresh = true;
+    }
+
+    if (tokenNeedsRefresh) {
+      const token = generateToken(user);
+      res.cookie('med_token', token, {
+        httpOnly: true,
+        secure: NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
+    }
+
     res.json({ user });
   } catch (e) {
     res.status(500).json({ error: 'Database error' });
