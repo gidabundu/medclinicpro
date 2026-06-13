@@ -464,6 +464,25 @@ function loadFallbackQR() {
 <body>
 <script>
   window.currentUser = null;
+  function applyUserUI() {
+    if (!window.currentUser) return;
+    if (window.currentUser.status !== 'Active' && window.currentUser.role !== 'Admin') {
+      const app = document.querySelector('.app');
+      const pending = document.getElementById('pending-screen');
+      if (app) app.style.display = 'none';
+      if (pending) pending.style.display = 'flex';
+    } else {
+      document.querySelectorAll('.header-user-name').forEach(el => el.textContent = window.currentUser.name);
+      document.querySelectorAll('.header-user-role').forEach(el => el.textContent = window.currentUser.role || 'Staff');
+      if (window.currentUser.name) {
+        document.querySelectorAll('.avatar').forEach(el => el.textContent = window.currentUser.name.substring(0,2).toUpperCase());
+      }
+      if (window.currentUser.role === 'Admin') {
+        const navUsers = document.getElementById('nav-users');
+        if (navUsers) navUsers.style.display = 'flex';
+      }
+    }
+  }
   (async function(){
     try{
       document.documentElement.style.display = 'none';
@@ -476,22 +495,12 @@ function loadFallbackQR() {
       const data = await res.json();
       window.currentUser = data.user;
       document.documentElement.style.display = 'block';
-      
-      document.addEventListener('DOMContentLoaded', () => {
-        if (window.currentUser.status !== 'Active' && window.currentUser.role !== 'Admin') {
-          document.querySelector('.app').style.display = 'none';
-          document.getElementById('pending-screen').style.display = 'flex';
-        } else {
-          document.querySelectorAll('.header-user-name').forEach(el => el.textContent = window.currentUser.name);
-          document.querySelectorAll('.header-user-role').forEach(el => el.textContent = window.currentUser.role || 'Staff');
-          if (window.currentUser.name) {
-            document.querySelectorAll('.avatar').forEach(el => el.textContent = window.currentUser.name.substring(0,2).toUpperCase());
-          }
-          if (window.currentUser.role === 'Admin') {
-            document.getElementById('nav-users').style.display = 'flex';
-          }
-        }
-      });
+      // DOM is fully parsed by the time the fetch resolves; run immediately
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyUserUI);
+      } else {
+        applyUserUI();
+      }
     }catch(e){
       window.location.href = 'login.html';
     }
