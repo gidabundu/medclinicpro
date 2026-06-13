@@ -3545,10 +3545,8 @@ function editPatient() {
 // Users API Functions
 async function loadUsers() {
   try {
-    const apiBase = API_BASE;
-    const res = await fetch(`${apiBase}/api/users`, { credentials: 'include' });
-    if (!res.ok) throw new Error('Failed to load users');
-    const users = await res.json();
+    const users = await apiFetch('/api/users');
+    if (!users) return; // apiFetch handles 401 redirect
     const tbody = document.getElementById('users-table-body');
     if (users.length === 0) {
       tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">No users found</td></tr>';
@@ -3580,40 +3578,32 @@ async function loadUsers() {
     `).join('');
   } catch (err) {
     console.error(err);
-    document.getElementById('users-table-body').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:red;">Error loading users</td></tr>';
+    document.getElementById('users-table-body').innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:red;">Error loading users: ${err.message}</td></tr>`;
   }
 }
 
 async function updateUserRole(userId, newRole) {
   try {
-    const apiBase = API_BASE;
-    const res = await fetch(`${apiBase}/api/users/${userId}/role`, {
+    await apiFetch(`/api/users/${userId}/role`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ role: newRole })
+      body: { role: newRole }
     });
-    if (!res.ok) throw new Error('Failed to update role');
     showToast('User role updated');
   } catch (err) {
-    alert('Error updating user role');
+    alert(`Error updating user role: ${err.message}`);
     loadUsers();
   }
 }
 
 async function updateUserStatus(userId, newStatus) {
   try {
-    const apiBase = API_BASE;
-    const res = await fetch(`${apiBase}/api/users/${userId}/status`, {
+    await apiFetch(`/api/users/${userId}/status`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ status: newStatus })
+      body: { status: newStatus }
     });
-    if (!res.ok) throw new Error('Failed to update status');
     showToast('User status updated');
   } catch (err) {
-    alert('Error updating user status');
+    alert(`Error updating user status: ${err.message}`);
     loadUsers();
   }
 }
