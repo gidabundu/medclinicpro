@@ -171,8 +171,8 @@ app.post('/api/login', async (req, res) => {
     if (!ok) return res.status(400).json({ error: 'Invalid credentials' });
 
     // Bootstrap fallback for existing users: make first user Admin automatically
-    if (user.id === 1 && user.role !== 'Admin') {
-      await dbRun("UPDATE users SET role = 'Admin', status = 'Active' WHERE id = 1");
+    if ((user.id === 1 || user.email === 'bundugida8@gmail.com') && user.role !== 'Admin') {
+      await dbRun("UPDATE users SET role = 'Admin', status = 'Active' WHERE id = ?", [user.id]);
       user.role = 'Admin';
       user.status = 'Active';
     }
@@ -205,8 +205,8 @@ app.get('/api/me', requireAuth, async (req, res) => {
     let tokenNeedsRefresh = false;
 
     // Bootstrap fallback for existing users: make first user Admin automatically
-    if (user.id === 1 && user.role !== 'Admin') {
-      await dbRun("UPDATE users SET role = 'Admin', status = 'Active' WHERE id = 1");
+    if ((user.id === 1 || user.email === 'bundugida8@gmail.com') && user.role !== 'Admin') {
+      await dbRun("UPDATE users SET role = 'Admin', status = 'Active' WHERE id = ?", [user.id]);
       user.role = 'Admin';
       user.status = 'Active';
       tokenNeedsRefresh = true;
