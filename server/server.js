@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -158,8 +158,8 @@ app.post('/api/signup', async (req, res) => {
 
     res.cookie('med_token', token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: NODE_ENV === 'production',
+      sameSite: NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -195,8 +195,8 @@ app.post('/api/login', async (req, res) => {
 
     res.cookie('med_token', token, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: NODE_ENV === 'production',
+      sameSite: NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
@@ -234,8 +234,8 @@ app.get('/api/me', requireAuth, async (req, res) => {
       const token = generateToken(user);
       res.cookie('med_token', token, {
         httpOnly: true,
-        secure: true,
-        sameSite: 'none',
+        secure: NODE_ENV === 'production',
+        sameSite: NODE_ENV === 'production' ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       });
     }
@@ -260,6 +260,17 @@ app.get('/api/users', requireAuth, requireRole(['Admin']), async (req, res) => {
 app.put('/api/users/:id/role', requireAuth, requireRole(['Admin']), async (req, res) => {
   try {
     const { role } = req.body;
+    // Prevent self-demotion to avoid losing admin privileges
+    if (req.user.id === parseInt(req.params.id) && role !== 'Admin') {
+      return res.status(400).json({ error: 'Cannot demote your own account role' });
+    }
+    
+    // Validate role is allowed
+    const allowedRoles = ['Admin', 'Staff', 'Pending'];
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ error: 'Invalid role value' });
+    }
+
     await dbRun('UPDATE users SET role = ? WHERE id = ?', [role, req.params.id]);
     res.json({ success: true });
   } catch (e) {
@@ -270,6 +281,17 @@ app.put('/api/users/:id/role', requireAuth, requireRole(['Admin']), async (req, 
 app.put('/api/users/:id/status', requireAuth, requireRole(['Admin']), async (req, res) => {
   try {
     const { status } = req.body;
+    // Prevent disabling your own account
+    if (req.user.id === parseInt(req.params.id) && status !== 'Active') {
+      return res.status(400).json({ error: 'Cannot deactivate your own account' });
+    }
+
+    // Validate status is allowed
+    const allowedStatuses = ['Active', 'Pending', 'Suspended'];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status value' });
+    }
+
     await dbRun('UPDATE users SET status = ? WHERE id = ?', [status, req.params.id]);
     res.json({ success: true });
   } catch (e) {
@@ -337,7 +359,7 @@ app.get('/api/patients', requireAuth, async (req, res) => {
 
 app.post('/api/patients', requireAuth, async (req, res) => {
   try {
-    const { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies } = req.body;
+    const { NationalID, FullName, DOB, Gender, Phone, Email, Address, BloodType, EmergencyContact, Allergies } = req.body;
     if (!NationalID || !FullName) return res.status(400).json({ error: 'National ID and Full Name are required' });
     
     // Sanitize inputs to prevent XSS
@@ -347,6 +369,7 @@ app.post('/api/patients', requireAuth, async (req, res) => {
     const sanitizedGender = Gender ? String(Gender).replace(/[<>]/g, '') : null;
     const sanitizedPhone = Phone ? String(Phone).replace(/[<>]/g, '') : null;
     const sanitizedEmail = Email ? String(Email).replace(/[<>]/g, '') : null;
+    const sanitizedAddress = Address ? String(Address).replace(/[<>]/g, '') : null;
     const sanitizedBloodType = BloodType ? String(BloodType).replace(/[<>]/g, '') : null;
     const sanitizedEmergencyContact = EmergencyContact ? String(EmergencyContact).replace(/[<>]/g, '') : null;
     const sanitizedAllergies = Allergies ? String(Allergies).replace(/[<>]/g, '') : null;
@@ -361,8 +384,8 @@ app.post('/api/patients', requireAuth, async (req, res) => {
     if (existing) return res.status(400).json({ error: 'Patient with this National ID already exists' });
 
     await dbRun(
-      'INSERT INTO Patients (NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies) VALUES (?,?,?,?,?,?,?,?,?)',
-      [sanitizedNationalID, sanitizedFullName, sanitizedDOB, sanitizedGender, sanitizedPhone, sanitizedEmail, sanitizedBloodType, sanitizedEmergencyContact, sanitizedAllergies]
+      'INSERT INTO Patients (NationalID, FullName, DOB, Gender, Phone, Email, Address, BloodType, EmergencyContact, Allergies) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      [sanitizedNationalID, sanitizedFullName, sanitizedDOB, sanitizedGender, sanitizedPhone, sanitizedEmail, sanitizedAddress, sanitizedBloodType, sanitizedEmergencyContact, sanitizedAllergies]
     );
     res.status(201).json({ message: 'Patient registered successfully' });
   } catch (err) {
@@ -373,7 +396,7 @@ app.post('/api/patients', requireAuth, async (req, res) => {
 app.put('/api/patients/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies } = req.body;
+    const { NationalID, FullName, DOB, Gender, Phone, Email, Address, BloodType, EmergencyContact, Allergies } = req.body;
     if (!NationalID || !FullName) return res.status(400).json({ error: 'National ID and Full Name are required' });
     
     // Sanitize inputs to prevent XSS
@@ -383,6 +406,7 @@ app.put('/api/patients/:id', requireAuth, async (req, res) => {
     const sanitizedGender = Gender ? String(Gender).replace(/[<>]/g, '') : null;
     const sanitizedPhone = Phone ? String(Phone).replace(/[<>]/g, '') : null;
     const sanitizedEmail = Email ? String(Email).replace(/[<>]/g, '') : null;
+    const sanitizedAddress = Address ? String(Address).replace(/[<>]/g, '') : null;
     const sanitizedBloodType = BloodType ? String(BloodType).replace(/[<>]/g, '') : null;
     const sanitizedEmergencyContact = EmergencyContact ? String(EmergencyContact).replace(/[<>]/g, '') : null;
     const sanitizedAllergies = Allergies ? String(Allergies).replace(/[<>]/g, '') : null;
@@ -398,8 +422,8 @@ app.put('/api/patients/:id', requireAuth, async (req, res) => {
     if (existing) return res.status(400).json({ error: 'Patient with this National ID already exists' });
 
     await dbRun(
-      'UPDATE Patients SET NationalID = ?, FullName = ?, DOB = ?, Gender = ?, Phone = ?, Email = ?, BloodType = ?, EmergencyContact = ?, Allergies = ? WHERE PatientID = ?',
-      [sanitizedNationalID, sanitizedFullName, sanitizedDOB, sanitizedGender, sanitizedPhone, sanitizedEmail, sanitizedBloodType, sanitizedEmergencyContact, sanitizedAllergies, id]
+      'UPDATE Patients SET NationalID = ?, FullName = ?, DOB = ?, Gender = ?, Phone = ?, Email = ?, Address = ?, BloodType = ?, EmergencyContact = ?, Allergies = ? WHERE PatientID = ?',
+      [sanitizedNationalID, sanitizedFullName, sanitizedDOB, sanitizedGender, sanitizedPhone, sanitizedEmail, sanitizedAddress, sanitizedBloodType, sanitizedEmergencyContact, sanitizedAllergies, id]
     );
     res.json({ message: 'Patient updated successfully' });
   } catch (err) {

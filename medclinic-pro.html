@@ -459,13 +459,85 @@ function loadFallbackQR() {
       display: block !important;
     }
   }
+
+  /* DARK MODE AND COMPACT VIEW SUPPORT */
+  html.dark-mode {
+    --gray-50: #121214;
+    --gray-100: #1a1a1e;
+    --gray-200: #26262b;
+    --gray-300: #323239;
+    --gray-400: #43434c;
+    --gray-500: #62626d;
+    --gray-600: #8c8c9a;
+    --gray-700: #c1c1cb;
+    --gray-900: #f5f5f7;
+    background: #121214;
+    color: #f5f5f7;
+  }
+  html.dark-mode body {
+    background: #121214;
+    color: #f5f5f7;
+  }
+  html.dark-mode .sidebar {
+    background: #1a1a1e;
+    border-right-color: #26262b;
+  }
+  html.dark-mode .header, html.dark-mode .top-header {
+    background: #1a1a1e;
+    border-bottom-color: #26262b;
+  }
+  html.dark-mode .stat-card, html.dark-mode .schedule-card, html.dark-mode .activity-card {
+    background: #1a1a1e;
+    border-color: #26262b;
+  }
+  html.dark-mode .brand-name {
+    color: #fff;
+  }
+  html.dark-mode input, html.dark-mode select, html.dark-mode textarea {
+    background: #26262b !important;
+    border-color: #323239 !important;
+    color: #fff !important;
+  }
+  html.dark-mode .modal {
+    background: #1a1a1e;
+    border: 1px solid #26262b;
+    color: #fff;
+  }
+  html.dark-mode .modal-header, html.dark-mode .modal-footer {
+    border-color: #26262b;
+  }
+  html.dark-mode .form-card, html.dark-mode .dashboard-grid > div {
+    background: #1a1a1e !important;
+    border-color: #26262b !important;
+  }
+  html.dark-mode tr {
+    border-bottom-color: #26262b !important;
+  }
+  html.dark-mode table thead tr {
+    background: #121214 !important;
+  }
+  html.dark-mode .appt-item {
+    border-bottom-color: #26262b !important;
+  }
+
+  html.compact-view .appt-item { padding: 6px 0 !important; }
+  html.compact-view .stat-card { padding: 10px 14px !important; }
+  html.compact-view td { padding: 6px 8px !important; }
+  html.compact-view th { padding: 8px 10px !important; }
+  html.compact-view .nav-item { padding: 6px 8px !important; }
+  html.compact-view .content { padding: 16px !important; }
 </style>
 </head>
 <body>
 <script>
-  const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? window.location.origin
-    : 'https://medclinicpro.onrender.com';
+  const API_BASE = window.location.origin;
+
+  // Immediately apply dark mode/compact view settings to avoid layout/color flashing
+  (function() {
+    const settings = JSON.parse(localStorage.getItem('medclinic_settings') || '{}');
+    if (settings.darkMode) document.documentElement.classList.add('dark-mode');
+    if (settings.compactView) document.documentElement.classList.add('compact-view');
+  })();
 
   window.currentUser = null;
   function applyUserUI() {
@@ -661,6 +733,63 @@ function loadFallbackQR() {
             <div class="header-user-role">Track patient visits</div>
           </div>
           <div class="avatar">VL</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- HEADER for vaccinations -->
+    <header class="header" id="header-vaccinations" style="display:none">
+      <div class="header-search">
+        <i class="ti ti-shield"></i>
+        <input type="text" placeholder="Search vaccination records...">
+      </div>
+      <div class="header-right">
+        <div class="header-icon-btn"><i class="ti ti-refresh" style="font-size:16px"></i></div>
+        <div class="header-icon-btn"><i class="ti ti-bell" style="font-size:16px"></i><div class="notif-dot"></div></div>
+        <div class="header-user">
+          <div class="header-user-info">
+            <div class="header-user-name">Vaccinations</div>
+            <div class="header-user-role">Immunization logs</div>
+          </div>
+          <div class="avatar">VC</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- HEADER for inventory -->
+    <header class="header" id="header-inventory" style="display:none">
+      <div class="header-search">
+        <i class="ti ti-package"></i>
+        <input type="text" placeholder="Search pharmacy inventory...">
+      </div>
+      <div class="header-right">
+        <div class="header-icon-btn"><i class="ti ti-refresh" style="font-size:16px"></i></div>
+        <div class="header-icon-btn"><i class="ti ti-bell" style="font-size:16px"></i><div class="notif-dot"></div></div>
+        <div class="header-user">
+          <div class="header-user-info">
+            <div class="header-user-name">Inventory</div>
+            <div class="header-user-role">Pharmacy & supplies</div>
+          </div>
+          <div class="avatar">IN</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- HEADER for users -->
+    <header class="header" id="header-users" style="display:none">
+      <div class="header-search">
+        <i class="ti ti-users"></i>
+        <input type="text" placeholder="Search users...">
+      </div>
+      <div class="header-right">
+        <div class="header-icon-btn"><i class="ti ti-refresh" style="font-size:16px"></i></div>
+        <div class="header-icon-btn"><i class="ti ti-bell" style="font-size:16px"></i><div class="notif-dot"></div></div>
+        <div class="header-user">
+          <div class="header-user-info">
+            <div class="header-user-name">Users</div>
+            <div class="header-user-role">System administration</div>
+          </div>
+          <div class="avatar">US</div>
         </div>
       </div>
     </header>
@@ -979,7 +1108,7 @@ function loadFallbackQR() {
       <!-- PATIENTS PAGE -->
       <div class="page" id="page-patients">
         <div class="page-title">Patient Registration</div>
-        <div class="reg-outer">
+        <form class="reg-outer" onsubmit="event.preventDefault(); savePatient();">
           <div class="reg-header">
             <div>
               <div class="reg-title">New Patient Intake</div>
@@ -996,7 +1125,7 @@ function loadFallbackQR() {
                 <label class="input-label">National ID / Passport Number</label>
                 <div class="search-input-row">
                   <input class="text-input" type="text" placeholder="e.g. 123-456-789" id="natId">
-                  <button class="btn-search-existing" onclick="searchExisting()"><i class="ti ti-search" style="font-size:15px"></i> Search Existing</button>
+                  <button type="button" class="btn-search-existing" onclick="searchExisting()"><i class="ti ti-search" style="font-size:15px"></i> Search Existing</button>
                 </div>
                 <div class="helper-text">Check for duplicate records before creating a new entry.</div>
               </div>
@@ -1028,6 +1157,10 @@ function loadFallbackQR() {
               <div class="input-group">
                 <label class="input-label">Email Address</label>
                 <input class="text-input" type="email" placeholder="patient@email.com" id="email">
+              </div>
+              <div class="input-group">
+                <label class="input-label">Residential Address</label>
+                <input class="text-input" type="text" placeholder="123 Oak Drive, City, Country" id="address">
               </div>
               <div class="input-row">
                 <div class="input-group">
@@ -1081,10 +1214,10 @@ function loadFallbackQR() {
           </div>
 
           <div class="reg-footer">
-            <button class="btn-discard" onclick="discardForm()">Discard Draft</button>
-            <button class="btn-save" onclick="savePatient()"><i class="ti ti-device-floppy" style="font-size:16px"></i> Save Patient Record</button>
+            <button type="button" class="btn-discard" onclick="discardForm()">Discard Draft</button>
+            <button type="submit" class="btn-save"><i class="ti ti-device-floppy" style="font-size:16px"></i> Save Patient Record</button>
           </div>
-        </div>
+        </form>
 
         <div style="background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:20px;margin-top:20px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
@@ -1374,24 +1507,26 @@ function loadFallbackQR() {
   <div class="qr-modal" style="width: 400px; text-align: left;">
     <div class="qr-modal-inner">
       <button class="qr-close" onclick="closeStaffModal()"><i class="ti ti-x" style="font-size:14px"></i></button>
-      <div class="qr-title" style="margin-bottom:16px;">Add New Staff Member</div>
-      <div class="form-group">
-        <label class="form-label">Full Name</label>
-        <input class="form-input" type="text" id="newStaffName" placeholder="e.g. Dr. Robert Carter" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Role</label>
-        <input class="form-input" type="text" id="newStaffRole" placeholder="e.g. Cardiologist, Senior Nurse" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input class="form-input" type="email" id="newStaffEmail" placeholder="e.g. robert.carter@medclinic.com" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Phone</label>
-        <input class="form-input" type="tel" id="newStaffPhone" placeholder="e.g. +123456784" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:16px;">
-      </div>
-      <button class="btn-confirm" style="width:100%;" onclick="saveStaff()"><i class="ti ti-plus"></i> Add Staff Member</button>
+      <form onsubmit="event.preventDefault(); saveStaff();">
+        <div class="qr-title" style="margin-bottom:16px;">Add New Staff Member</div>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" type="text" id="newStaffName" placeholder="e.g. Dr. Robert Carter" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <input class="form-input" type="text" id="newStaffRole" placeholder="e.g. Cardiologist, Senior Nurse" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" type="email" id="newStaffEmail" placeholder="e.g. robert.carter@medclinic.com" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" type="tel" id="newStaffPhone" placeholder="e.g. +123456784" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:16px;">
+        </div>
+        <button type="submit" class="btn-confirm" style="width:100%;"><i class="ti ti-plus"></i> Add Staff Member</button>
+      </form>
     </div>
   </div>
 </div>
@@ -1401,34 +1536,36 @@ function loadFallbackQR() {
   <div class="qr-modal" style="width: 400px; text-align: left;">
     <div class="qr-modal-inner">
       <button class="qr-close" onclick="closeVaccinationModal()"><i class="ti ti-x" style="font-size:14px"></i></button>
-      <div class="qr-title" style="margin-bottom:16px;">Record Vaccination</div>
-      <div class="form-group">
-        <label class="form-label">Select Patient</label>
-        <select class="form-input" id="vacPatientId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Administered By</label>
-        <select class="form-input" id="vacStaffId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Vaccine Name</label>
-        <select class="form-input" id="vacName" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;">
-          <option>Influenza Vaccine</option>
-          <option>COVID-19 Booster</option>
-          <option>BCG Vaccine</option>
-          <option>Tetanus Vaccine</option>
-          <option>Hepatitis B Vaccine</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Dose</label>
-        <input class="form-input" type="text" id="vacDose" placeholder="e.g. 0.5 mL" value="0.5 mL" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Administration Date</label>
-        <input class="form-input" type="datetime-local" id="vacAdminDate" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:16px;">
-      </div>
-      <button class="btn-confirm" style="width:100%;" onclick="saveVaccination()"><i class="ti ti-device-floppy"></i> Record Vaccination</button>
+      <form onsubmit="event.preventDefault(); saveVaccination();">
+        <div class="qr-title" style="margin-bottom:16px;">Record Vaccination</div>
+        <div class="form-group">
+          <label class="form-label">Select Patient</label>
+          <select class="form-input" id="vacPatientId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Administered By</label>
+          <select class="form-input" id="vacStaffId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vaccine Name</label>
+          <select class="form-input" id="vacName" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;" required>
+            <option>Influenza Vaccine</option>
+            <option>COVID-19 Booster</option>
+            <option>BCG Vaccine</option>
+            <option>Tetanus Vaccine</option>
+            <option>Hepatitis B Vaccine</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dose</label>
+          <input class="form-input" type="text" id="vacDose" placeholder="e.g. 0.5 mL" value="0.5 mL" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Administration Date</label>
+          <input class="form-input" type="datetime-local" id="vacAdminDate" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:16px;" required>
+        </div>
+        <button type="submit" class="btn-confirm" style="width:100%;"><i class="ti ti-device-floppy"></i> Record Vaccination</button>
+      </form>
     </div>
   </div>
 </div>
@@ -1438,37 +1575,39 @@ function loadFallbackQR() {
   <div class="qr-modal" style="width: 400px; text-align: left;">
     <div class="qr-modal-inner">
       <button class="qr-close" onclick="closeVisitModal()"><i class="ti ti-x" style="font-size:14px"></i></button>
-      <div class="qr-title" style="margin-bottom:16px;">Log Patient Visit</div>
-      <div class="form-group">
-        <label class="form-label">Select Patient</label>
-        <select class="form-input" id="visitPatientId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Consulting Staff</label>
-        <select class="form-input" id="visitStaffId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Reason for Visit</label>
-        <input class="form-input" type="text" id="visitReason" placeholder="e.g. Routine checkup" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Clinical Notes</label>
-        <textarea class="textarea-input" id="visitNotes" placeholder="Enter clinical notes..." style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; resize:vertical; min-height:60px; margin-bottom:12px; font-family:inherit;"></textarea>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Status</label>
-        <select class="form-input" id="visitStatus" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;">
-          <option>Checked In</option>
-          <option>In Progress</option>
-          <option>Waiting</option>
-          <option>Completed</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Visit Date</label>
-        <input class="form-input" type="datetime-local" id="visitDate" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:16px;">
-      </div>
-      <button class="btn-confirm" style="width:100%;" onclick="saveVisit()"><i class="ti ti-device-floppy"></i> Log Visit</button>
+      <form onsubmit="event.preventDefault(); saveVisit();">
+        <div class="qr-title" style="margin-bottom:16px;">Log Patient Visit</div>
+        <div class="form-group">
+          <label class="form-label">Select Patient</label>
+          <select class="form-input" id="visitPatientId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Consulting Staff</label>
+          <select class="form-input" id="visitStaffId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason for Visit</label>
+          <input class="form-input" type="text" id="visitReason" placeholder="e.g. Routine checkup" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Clinical Notes</label>
+          <textarea class="textarea-input" id="visitNotes" placeholder="Enter clinical notes..." style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; resize:vertical; min-height:60px; margin-bottom:12px; font-family:inherit;"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="visitStatus" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;" required>
+            <option>Checked In</option>
+            <option>In Progress</option>
+            <option>Waiting</option>
+            <option>Completed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Visit Date</label>
+          <input class="form-input" type="datetime-local" id="visitDate" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:16px;" required>
+        </div>
+        <button type="submit" class="btn-confirm" style="width:100%;"><i class="ti ti-device-floppy"></i> Log Visit</button>
+      </form>
     </div>
   </div>
 </div>
@@ -1478,32 +1617,34 @@ function loadFallbackQR() {
   <div class="qr-modal" style="width: 400px; text-align: left;">
     <div class="qr-modal-inner">
       <button class="qr-close" onclick="closePrescriptionModal()"><i class="ti ti-x" style="font-size:14px"></i></button>
-      <div class="qr-title" style="margin-bottom:16px;">Create Prescription</div>
-      <div class="form-group">
-        <label class="form-label">Select Visit</label>
-        <select class="form-input" id="prescVisitId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Select Drug</label>
-        <select class="form-input" id="prescDrugId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Dosage</label>
-        <input class="form-input" type="text" id="prescDosage" placeholder="e.g. 500mg" value="500mg" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Frequency</label>
-        <input class="form-input" type="text" id="prescFrequency" placeholder="e.g. Three times daily" value="Three times daily" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Duration</label>
-        <input class="form-input" type="text" id="prescDuration" placeholder="e.g. 5 days" value="5 days" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Instructions</label>
-        <input class="form-input" type="text" id="prescInstructions" placeholder="e.g. Take with food" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:16px;">
-      </div>
-      <button class="btn-confirm" style="width:100%;" onclick="savePrescription()"><i class="ti ti-device-floppy"></i> Create Prescription</button>
+      <form onsubmit="event.preventDefault(); savePrescription();">
+        <div class="qr-title" style="margin-bottom:16px;">Create Prescription</div>
+        <div class="form-group">
+          <label class="form-label">Select Visit</label>
+          <select class="form-input" id="prescVisitId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Select Drug</label>
+          <select class="form-input" id="prescDrugId" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px; background:#fff;" required></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dosage</label>
+          <input class="form-input" type="text" id="prescDosage" placeholder="e.g. 500mg" value="500mg" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Frequency</label>
+          <input class="form-input" type="text" id="prescFrequency" placeholder="e.g. Three times daily" value="Three times daily" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duration</label>
+          <input class="form-input" type="text" id="prescDuration" placeholder="e.g. 5 days" value="5 days" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:12px;" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Instructions</label>
+          <input class="form-input" type="text" id="prescInstructions" placeholder="e.g. Take with food" style="width:100%; padding:8px 10px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:13px; margin-bottom:16px;">
+        </div>
+        <button type="submit" class="btn-confirm" style="width:100%;"><i class="ti ti-device-floppy"></i> Create Prescription</button>
+      </form>
     </div>
   </div>
 </div>
@@ -1737,6 +1878,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Logout handler
 async function logout() {
+  if (!confirm('Are you sure you want to log out?')) return;
   try {
     await apiFetch('/api/logout', { method: 'POST' });
     window.location.href = 'login.html';
@@ -1752,7 +1894,7 @@ function showPage(name, navEl){
     if(el) el.classList.toggle('active', p===name);
   });
   
-  const headers = ['dashboard', 'appointments', 'patients', 'staff', 'visits'];
+  const headers = ['dashboard', 'appointments', 'patients', 'staff', 'visits', 'vaccinations', 'inventory', 'users'];
   headers.forEach(h => {
     const headerEl = document.getElementById('header-' + h);
     if (headerEl) headerEl.style.display = h === name ? 'flex' : 'none';
@@ -2123,7 +2265,9 @@ async function searchExisting() {
       document.getElementById('dob').value = p.DOB || '';
       document.getElementById('gender').value = p.Gender || '';
       document.getElementById('contact').value = p.Phone || '';
-      document.getElementById('allergies').value = p.Address || ''; // Note: address maps to address or allergies, let's keep it simple
+      document.getElementById('email').value = p.Email || '';
+      document.getElementById('address').value = p.Address || '';
+      document.getElementById('allergies').value = p.Allergies || '';
       showToast('Patient record loaded!');
     } else {
       showToast('No patient found with this ID');
@@ -2140,6 +2284,7 @@ async function savePatient() {
   const Gender = document.getElementById('gender').value;
   const Phone = document.getElementById('contact').value.trim();
   const Email = document.getElementById('email').value.trim();
+  const Address = document.getElementById('address').value.trim();
   const BloodType = document.getElementById('bloodType').value;
   const EmergencyContact = document.getElementById('emergencyContact').value.trim();
   const Allergies = document.getElementById('allergies').value.trim();
@@ -2155,14 +2300,14 @@ async function savePatient() {
       // Update existing patient
       await apiFetch(`/api/patients/${window.editingPatientId}`, {
         method: 'PUT',
-        body: { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies }
+        body: { NationalID, FullName, DOB, Gender, Phone, Email, Address, BloodType, EmergencyContact, Allergies }
       });
       showToast('Patient record updated successfully!');
     } else {
       // Create new patient
       await apiFetch('/api/patients', {
         method: 'POST',
-        body: { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies }
+        body: { NationalID, FullName, DOB, Gender, Phone, Email, Address, BloodType, EmergencyContact, Allergies }
       });
       showToast('Patient record saved successfully!');
     }
@@ -2182,7 +2327,7 @@ async function savePatient() {
 }
 
 function discardForm() {
-  ['natId','fullName','dob','contact','email','bloodType','emergencyContact','allergies'].forEach(id=>{
+  ['natId','fullName','dob','contact','email','address','bloodType','emergencyContact','allergies'].forEach(id=>{
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -3222,23 +3367,18 @@ function saveSettings() {
   
   localStorage.setItem('medclinic_settings', JSON.stringify(settings));
   
-  // Apply dark mode
+  // Apply dark mode class
   if (settings.darkMode) {
-    document.documentElement.style.setProperty('--gray-50', '#1a1a2e');
-    document.documentElement.style.setProperty('--gray-100', '#16213e');
-    document.documentElement.style.setProperty('--gray-200', '#0f3460');
-    document.documentElement.style.setProperty('--gray-300', '#1a1a2e');
-    document.documentElement.style.setProperty('--gray-900', '#eaeaea');
-    document.body.style.background = '#0f0f1a';
-    document.body.style.color = '#eaeaea';
+    document.documentElement.classList.add('dark-mode');
   } else {
-    document.documentElement.style.removeProperty('--gray-50');
-    document.documentElement.style.removeProperty('--gray-100');
-    document.documentElement.style.removeProperty('--gray-200');
-    document.documentElement.style.removeProperty('--gray-300');
-    document.documentElement.style.removeProperty('--gray-900');
-    document.body.style.background = '';
-    document.body.style.color = '';
+    document.documentElement.classList.remove('dark-mode');
+  }
+
+  // Apply compact view class
+  if (settings.compactView) {
+    document.documentElement.classList.add('compact-view');
+  } else {
+    document.documentElement.classList.remove('compact-view');
   }
   
   showToast('Settings saved successfully!');
@@ -3520,6 +3660,7 @@ function editPatient() {
   document.getElementById('gender').value = patient.Gender || '';
   document.getElementById('contact').value = patient.Phone || '';
   document.getElementById('email').value = patient.Email || '';
+  document.getElementById('address').value = patient.Address || '';
   document.getElementById('bloodType').value = patient.BloodType || '';
   document.getElementById('emergencyContact').value = patient.EmergencyContact || '';
   document.getElementById('allergies').value = patient.Allergies || '';
@@ -3624,16 +3765,7 @@ async function updateUserStatus(userId, newStatus) {
   }
 }
 
-// Logout function
-async function logout() {
-  try {
-    const apiBase = API_BASE;
-    await fetch(`${apiBase}/api/logout`, { method: 'POST', credentials: 'include' });
-    window.location.href = 'login.html';
-  } catch (err) {
-    alert('Error logging out');
-  }
-}
+
 
 // Helper function to calculate age
 function calculateAge(dob) {

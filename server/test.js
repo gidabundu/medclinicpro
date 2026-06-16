@@ -1,10 +1,18 @@
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
+
+const testDbPath = path.join(__dirname, 'medclinic_test.db');
+// Remove old test db if it exists
+if (fs.existsSync(testDbPath)) {
+  try { fs.unlinkSync(testDbPath); } catch (e) {}
+}
 
 const PORT = 3001; // use separate port for testing to avoid conflicts
 process.env.PORT = PORT;
 process.env.JWT_SECRET = 'test_secret_for_clinic_management_123';
 process.env.NODE_ENV = 'test';
+process.env.DB_PATH = testDbPath;
 
 // Start the server
 const serverProcess = spawn('node', [path.join(__dirname, 'server.js')], {
@@ -353,6 +361,13 @@ async function runTests() {
 function cleanup(exitCode) {
   console.log('Terminating test server...');
   serverProcess.kill();
+  
+  // Clean up test database file
+  const testDbPath = process.env.DB_PATH;
+  if (testDbPath && fs.existsSync(testDbPath)) {
+    try { fs.unlinkSync(testDbPath); } catch (e) {}
+  }
+  
   process.exit(exitCode);
 }
 

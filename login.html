@@ -4,21 +4,233 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>MedClinic Pro - Login</title>
-  <style>body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;display:flex;align-items:center;justify-content:center;height:100vh;margin:0}form{background:#fff;padding:24px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,.06);width:320px;box-sizing:border-box}h2{margin-bottom:12px}input{width:100%;padding:10px;margin-bottom:10px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box}button{width:100%;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer}a{display:block;text-align:center;margin-top:10px;color:#2563eb;text-decoration:none}.password-container{position:relative;width:100%;margin-bottom:10px}.password-container input{margin-bottom:0;padding-right:40px}.toggle-password{position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;background:none;border:none;padding:0;color:#666;width:auto;display:flex;align-items:center;justify-content:center;height:100%}</style>
+  <link rel="stylesheet" href="https://unpkg.com/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    :root {
+      --navy: #1a2b4b;
+      --navy-light: #243560;
+      --blue: #2563eb;
+      --blue-light: #3b82f6;
+      --blue-bg: #eff6ff;
+      --gray-50: #f8f9fa;
+      --gray-100: #f1f3f5;
+      --gray-200: #e9ecef;
+      --gray-500: #adb5bd;
+      --gray-700: #495057;
+      --gray-900: #212529;
+      --radius: 10px;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--gray-900);
+      padding: 20px;
+    }
+    .card-container {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 40px 32px;
+      border-radius: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.3s ease;
+    }
+    .brand-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--navy);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 24px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+    .brand-name {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.5px;
+    }
+    .brand-sub {
+      font-size: 11px;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    h2 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy-light);
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .input-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+    .input-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-wrapper i {
+      position: absolute;
+      left: 14px;
+      color: var(--gray-500);
+      font-size: 18px;
+      pointer-events: none;
+    }
+    input {
+      width: 100%;
+      padding: 12px 16px 12px 42px;
+      border: 1.5px solid var(--gray-200);
+      border-radius: var(--radius);
+      font-size: 14px;
+      transition: all 0.2s ease;
+      background: var(--gray-50);
+      color: var(--gray-900);
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--blue);
+      background: #fff;
+      box-shadow: 0 0 0 4px var(--blue-bg);
+    }
+    .password-container {
+      width: 100%;
+    }
+    .password-container input {
+      padding-right: 44px;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 8px;
+      color: var(--gray-500);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.15s;
+    }
+    .toggle-password:hover {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+      margin-top: 10px;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+    button[type="submit"]:hover {
+      background: var(--blue-light);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px -1px rgba(37, 99, 235, 0.3);
+    }
+    button[type="submit"]:active {
+      transform: translateY(0);
+    }
+    .footer-links {
+      text-align: center;
+      margin-top: 24px;
+    }
+    a {
+      font-size: 13px;
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.15s;
+    }
+    a:hover {
+      color: var(--blue-light);
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-  <form id="loginForm">
-    <h2>Sign In</h2>
-    <input type="email" id="email" placeholder="Email" required>
-    <div class="password-container">
-      <input type="password" id="password" placeholder="Password" required>
-      <button type="button" class="toggle-password" id="togglePassword">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-      </button>
+  <div class="card-container">
+    <div class="brand-header">
+      <div class="brand-icon"><i class="ti ti-activity"></i></div>
+      <div class="brand-name">MedClinic Pro</div>
+      <div class="brand-sub">Clinic System</div>
     </div>
-    <button type="submit">Login</button>
-    <a href="signup.html">Create an account</a>
-  </form>
+
+    <form id="loginForm">
+      <h2>Sign In to Your Account</h2>
+      
+      <div class="input-group">
+        <label class="input-label" for="email">Email Address</label>
+        <div class="input-wrapper">
+          <i class="ti ti-mail"></i>
+          <input type="email" id="email" placeholder="name@clinic.com" required>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="password">Password</label>
+        <div class="input-wrapper password-container">
+          <i class="ti ti-lock"></i>
+          <input type="password" id="password" placeholder="••••••••" required>
+          <button type="button" class="toggle-password" id="togglePassword" aria-label="Toggle Password Visibility">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit">Login</button>
+      
+      <div class="footer-links">
+        <a href="signup.html">Don't have an account? Create one</a>
+      </div>
+    </form>
+  </div>
 
   <script>
     const togglePassword = document.getElementById('togglePassword');
@@ -33,9 +245,7 @@
       e.preventDefault();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
-      const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-        ? window.location.origin
-        : 'https://medclinicpro.onrender.com';
+      const apiBase = window.location.origin;
       try{
         const res = await fetch(`${apiBase}/api/login`,{
           method:'POST',
