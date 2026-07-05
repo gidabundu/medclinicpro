@@ -98,6 +98,16 @@ const initDb = async () => {
   } catch (err) {
     // Column already exists
   }
+  try {
+    await dbRun(`ALTER TABLE Patients ADD COLUMN PhysicalFeeling TEXT`);
+  } catch (err) {
+    // Column already exists
+  }
+  try {
+    await dbRun(`ALTER TABLE Patients ADD COLUMN MedicalHistory TEXT`);
+  } catch (err) {
+    // Column already exists
+  }
 
   // Staff table
   await dbRun(`CREATE TABLE IF NOT EXISTS Staff (
