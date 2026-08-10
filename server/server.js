@@ -68,7 +68,8 @@ app.use(cors({
 }));
 
 // Body and Cookie parsers
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '5mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(cookieParser());
 
 // Serve static files from workspace root
@@ -337,7 +338,7 @@ app.get('/api/patients', requireAuth, async (req, res) => {
 
 app.post('/api/patients', requireAuth, async (req, res) => {
   try {
-    const { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies, PhysicalFeeling, MedicalHistory } = req.body;
+    const { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies, PhysicalFeeling, MedicalHistory, PassportPhoto } = req.body;
     if (!NationalID || !FullName) return res.status(400).json({ error: 'National ID and Full Name are required' });
     
     // Sanitize inputs to prevent XSS
@@ -352,6 +353,7 @@ app.post('/api/patients', requireAuth, async (req, res) => {
     const sanitizedAllergies = Allergies ? String(Allergies).replace(/[<>]/g, '') : null;
     const sanitizedPhysicalFeeling = PhysicalFeeling ? String(PhysicalFeeling).replace(/[<>]/g, '') : null;
     const sanitizedMedicalHistory = MedicalHistory ? String(MedicalHistory).replace(/[<>]/g, '') : null;
+    const sanitizedPassportPhoto = PassportPhoto ? String(PassportPhoto).replace(/[<>]/g, '') : null;
     
     // Email validation if provided
     if (sanitizedEmail) {
@@ -363,8 +365,8 @@ app.post('/api/patients', requireAuth, async (req, res) => {
     if (existing) return res.status(400).json({ error: 'Patient with this National ID already exists' });
 
     await dbRun(
-      'INSERT INTO Patients (NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies, PhysicalFeeling, MedicalHistory) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-      [sanitizedNationalID, sanitizedFullName, sanitizedDOB, sanitizedGender, sanitizedPhone, sanitizedEmail, sanitizedBloodType, sanitizedEmergencyContact, sanitizedAllergies, sanitizedPhysicalFeeling, sanitizedMedicalHistory]
+      'INSERT INTO Patients (NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies, PhysicalFeeling, MedicalHistory, PassportPhoto) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+      [sanitizedNationalID, sanitizedFullName, sanitizedDOB, sanitizedGender, sanitizedPhone, sanitizedEmail, sanitizedBloodType, sanitizedEmergencyContact, sanitizedAllergies, sanitizedPhysicalFeeling, sanitizedMedicalHistory, sanitizedPassportPhoto]
     );
     res.status(201).json({ message: 'Patient registered successfully' });
   } catch (err) {
@@ -375,7 +377,7 @@ app.post('/api/patients', requireAuth, async (req, res) => {
 app.put('/api/patients/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies, PhysicalFeeling, MedicalHistory } = req.body;
+    const { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies, PhysicalFeeling, MedicalHistory, PassportPhoto } = req.body;
     if (!NationalID || !FullName) return res.status(400).json({ error: 'National ID and Full Name are required' });
     
     // Sanitize inputs to prevent XSS
@@ -390,6 +392,7 @@ app.put('/api/patients/:id', requireAuth, async (req, res) => {
     const sanitizedAllergies = Allergies ? String(Allergies).replace(/[<>]/g, '') : null;
     const sanitizedPhysicalFeeling = PhysicalFeeling ? String(PhysicalFeeling).replace(/[<>]/g, '') : null;
     const sanitizedMedicalHistory = MedicalHistory ? String(MedicalHistory).replace(/[<>]/g, '') : null;
+    const sanitizedPassportPhoto = PassportPhoto ? String(PassportPhoto).replace(/[<>]/g, '') : null;
     
     // Email validation if provided
     if (sanitizedEmail) {
@@ -402,8 +405,8 @@ app.put('/api/patients/:id', requireAuth, async (req, res) => {
     if (existing) return res.status(400).json({ error: 'Patient with this National ID already exists' });
 
     await dbRun(
-      'UPDATE Patients SET NationalID = ?, FullName = ?, DOB = ?, Gender = ?, Phone = ?, Email = ?, BloodType = ?, EmergencyContact = ?, Allergies = ?, PhysicalFeeling = ?, MedicalHistory = ? WHERE PatientID = ?',
-      [sanitizedNationalID, sanitizedFullName, sanitizedDOB, sanitizedGender, sanitizedPhone, sanitizedEmail, sanitizedBloodType, sanitizedEmergencyContact, sanitizedAllergies, sanitizedPhysicalFeeling, sanitizedMedicalHistory, id]
+      'UPDATE Patients SET NationalID = ?, FullName = ?, DOB = ?, Gender = ?, Phone = ?, Email = ?, BloodType = ?, EmergencyContact = ?, Allergies = ?, PhysicalFeeling = ?, MedicalHistory = ?, PassportPhoto = ? WHERE PatientID = ?',
+      [sanitizedNationalID, sanitizedFullName, sanitizedDOB, sanitizedGender, sanitizedPhone, sanitizedEmail, sanitizedBloodType, sanitizedEmergencyContact, sanitizedAllergies, sanitizedPhysicalFeeling, sanitizedMedicalHistory, sanitizedPassportPhoto, id]
     );
     res.json({ message: 'Patient updated successfully' });
   } catch (err) {

@@ -79,6 +79,9 @@ const initDb = async () => {
     BloodType TEXT,
     EmergencyContact TEXT,
     Allergies TEXT,
+    PhysicalFeeling TEXT,
+    MedicalHistory TEXT,
+    PassportPhoto TEXT,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
@@ -105,6 +108,11 @@ const initDb = async () => {
   }
   try {
     await dbRun(`ALTER TABLE Patients ADD COLUMN MedicalHistory TEXT`);
+  } catch (err) {
+    // Column already exists
+  }
+  try {
+    await dbRun(`ALTER TABLE Patients ADD COLUMN PassportPhoto TEXT`);
   } catch (err) {
     // Column already exists
   }

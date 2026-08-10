@@ -1520,6 +1520,45 @@
       margin-top: 4px
     }
 
+    .photo-upload-wrapper {
+      display: grid;
+      gap: 8px;
+    }
+
+    .photo-preview {
+      width: 100%;
+      min-height: 120px;
+      border: 1px dashed var(--gray-300);
+      border-radius: var(--radius);
+      background: #fafafa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .photo-preview.has-image span {
+      display: none;
+    }
+
+    .photo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .file-input {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--gray-300);
+      border-radius: var(--radius);
+      font-size: 13px;
+      background: #fff;
+      cursor: pointer;
+    }
+
     .vaccine-list {
       display: flex;
       flex-direction: column;
@@ -2681,9 +2720,7 @@
 
 <body>
   <script>
-    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? window.location.origin
-      : 'https://medclinicpro.onrender.com';
+    const API_BASE = '';
 
     window.currentUser = null;
     function applyUserUI() {
@@ -3324,6 +3361,18 @@
                 <div class="input-group">
                   <label class="input-label">Email Address</label>
                   <input class="text-input" type="email" placeholder="patient@email.com" id="email">
+                </div>
+                <div class="input-group">
+                  <label class="input-label">Passport Photo</label>
+                  <div class="photo-upload-wrapper">
+                    <div class="photo-preview" id="patientPhotoPreview">
+                      <span>No photo selected</span>
+                      <img id="patientPhotoImage" src="" alt="Passport photo preview" style="display:none">
+                    </div>
+                    <input class="file-input" type="file" id="patientPhoto" accept="image/*" onchange="handlePatientPhotoUpload(event)">
+                    <input type="hidden" id="patientPhotoData">
+                    <div class="helper-text">Upload a passport-style photo for the patient's record.</div>
+                  </div>
                 </div>
                 <div class="input-row">
                   <div class="input-group">
@@ -4670,6 +4719,7 @@
       const BloodType = document.getElementById('bloodType').value;
       const EmergencyContact = document.getElementById('emergencyContact').value.trim();
       const Allergies = document.getElementById('allergies').value.trim();
+      const PassportPhoto = document.getElementById('patientPhotoData').value || null;
 
       if (!NationalID || !FullName) {
         showToast('Please fill in required fields (ID & Name)');
@@ -4682,14 +4732,14 @@
           // Update existing patient
           await apiFetch(`/api/patients/${window.editingPatientId}`, {
             method: 'PUT',
-            body: { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies }
+            body: { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies, PassportPhoto }
           });
           showToast('Patient record updated successfully!');
         } else {
           // Create new patient
           await apiFetch('/api/patients', {
             method: 'POST',
-            body: { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies }
+            body: { NationalID, FullName, DOB, Gender, Phone, Email, BloodType, EmergencyContact, Allergies, PassportPhoto }
           });
           showToast('Patient record saved successfully!');
         }
@@ -4708,6 +4758,52 @@
       }
     }
 
+    function clearPatientPhotoPreview() {
+      const photoInput = document.getElementById('patientPhoto');
+      const photoData = document.getElementById('patientPhotoData');
+      const previewImage = document.getElementById('patientPhotoImage');
+      const previewWrapper = document.getElementById('patientPhotoPreview');
+
+      if (photoInput) photoInput.value = '';
+      if (photoData) photoData.value = '';
+      if (previewImage) previewImage.src = '';
+      if (previewImage) previewImage.style.display = 'none';
+      if (previewWrapper) previewWrapper.classList.remove('has-image');
+      if (previewWrapper) {
+        const span = previewWrapper.querySelector('span');
+        if (span) span.style.display = 'block';
+      }
+    }
+
+    function handlePatientPhotoUpload(event) {
+      const file = event.target.files[0];
+      const previewImage = document.getElementById('patientPhotoImage');
+      const previewWrapper = document.getElementById('patientPhotoPreview');
+      const photoData = document.getElementById('patientPhotoData');
+
+      if (!file) {
+        clearPatientPhotoPreview();
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        showToast('Please select a valid image file.');
+        event.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (photoData) photoData.value = reader.result;
+        if (previewImage) {
+          previewImage.src = reader.result;
+          previewImage.style.display = 'block';
+        }
+        if (previewWrapper) previewWrapper.classList.add('has-image');
+      };
+      reader.readAsDataURL(file);
+    }
+
     function discardForm() {
       ['natId', 'fullName', 'dob', 'contact', 'email', 'bloodType', 'emergencyContact', 'allergies'].forEach(id => {
         const el = document.getElementById(id);
@@ -4715,6 +4811,7 @@
       });
       const genderEl = document.getElementById('gender');
       if (genderEl) genderEl.value = '';
+      clearPatientPhotoPreview();
       document.querySelectorAll('.vaccine-item').forEach(v => {
         v.classList.remove('checked');
         const chk = v.querySelector('input');
@@ -5930,7 +6027,7 @@
       content.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray-500)">Loading patient information...</div>';
 
       try {
-        const patient = currentPatientsList.find(p => p.PatientID === patientId);
+const patient = currentPatientsList.find(p => String(p.PatientID) === String(patientId));
 
         if (!patient) {
           content.innerHTML = '<div style="text-align:center;padding:40px;color:var(--red)">Patient not found</div>';
@@ -5955,9 +6052,16 @@
 
         const age = calculateAge(patient.DOB);
 
-        content.innerHTML = `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px">
-        <div style="background:var(--gray-50);padding:16px;border-radius:8px">
+        const patientPhotoCard = patient.PassportPhoto ? `
+        <div style="background:var(--gray-50);padding:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;min-width:220px;max-width:220px;">
+          <img src="${patient.PassportPhoto}" alt="Patient Passport Photo" style="width:100%;height:auto;object-fit:cover;border-radius:8px;border:1px solid #ddd;">
+        </div>
+      ` : '';
+
+      content.innerHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:20px;margin-bottom:24px">
+        ${patientPhotoCard}
+        <div style="flex:1;min-width:260px;background:var(--gray-50);padding:16px;border-radius:8px">
           <h4 style="margin:0 0 12px;font-size:14px;color:var(--navy)">Personal Information</h4>
           <div style="font-size:13px;line-height:1.8">
             <div><strong>Full Name:</strong> ${escapeHtml(patient.FullName)}</div>
@@ -5968,7 +6072,7 @@
             <div><strong>Email:</strong> ${escapeHtml(patient.Email)}</div>
           </div>
         </div>
-        <div style="background:var(--gray-50);padding:16px;border-radius:8px">
+        <div style="flex:1;min-width:260px;background:var(--gray-50);padding:16px;border-radius:8px">
           <h4 style="margin:0 0 12px;font-size:14px;color:var(--navy)">Clinical Information</h4>
           <div style="font-size:13px;line-height:1.8">
             <div><strong>Blood Type:</strong> ${escapeHtml(patient.BloodType || 'Not specified')}</div>
@@ -6027,16 +6131,20 @@
     function printPatientInfo() {
       if (!currentPatientId) return;
 
-      const patient = currentPatientsList.find(p => p.PatientID === currentPatientId);
+      const patient = currentPatientsList.find(p => String(p.PatientID) === String(currentPatientId));
       if (!patient) {
         showToast('Patient not found');
         return;
       }
 
-      // Get the patient info content
-      const content = document.getElementById('patientInfoContent').innerHTML;
+      const age = calculateAge(patient.DOB);
+      const patientPhotoSection = patient.PassportPhoto ? `
+        <div style="background: #f8f9fa; padding: 16px; border-radius: 8px; text-align: center; margin-bottom: 20px;">
+          <img src="${patient.PassportPhoto}" alt="Patient Passport Photo" style="max-width: 220px; width: 100%; height: auto; object-fit: cover; border: 1px solid #ddd; border-radius: 8px;">
+          <div style="margin-top: 8px; font-size: 13px; color: #555;">Passport Photo</div>
+        </div>
+      ` : '';
 
-      // Create a print-friendly version
       const printWindow = window.open('', '_blank');
       printWindow.document.write(`
     <!DOCTYPE html>
@@ -6146,8 +6254,27 @@
         <h2>Patient Information</h2>
         <p>Generated on ${new Date().toLocaleString()}</p>
       </div>
-      ${content.replace(/style="[^"]*"/g, '').replace(/class="[^"]*"/g, '')}
-      
+      ${patientPhotoSection}
+      <div class="section">
+        <h3>Personal Information</h3>
+        <div class="info-grid">
+          <div class="info-item"><strong>Full Name:</strong> ${escapeHtml(patient.FullName)}</div>
+          <div class="info-item"><strong>National ID:</strong> ${escapeHtml(patient.NationalID)}</div>
+          <div class="info-item"><strong>Date of Birth:</strong> ${escapeHtml(patient.DOB)} (Age: ${age})</div>
+          <div class="info-item"><strong>Gender:</strong> ${escapeHtml(patient.Gender)}</div>
+          <div class="info-item"><strong>Contact:</strong> ${escapeHtml(patient.Phone)}</div>
+          <div class="info-item"><strong>Email:</strong> ${escapeHtml(patient.Email)}</div>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Clinical Information</h3>
+        <div class="info-grid">
+          <div class="info-item"><strong>Blood Type:</strong> ${escapeHtml(patient.BloodType || 'Not specified')}</div>
+          <div class="info-item"><strong>Emergency Contact:</strong> ${escapeHtml(patient.EmergencyContact || 'Not specified')}</div>
+          <div class="info-item"><strong>Allergies:</strong> ${escapeHtml(patient.Allergies || 'None reported')}</div>
+          <div class="info-item"><strong>Registered:</strong> ${escapeHtml(patient.CreatedAt)}</div>
+        </div>
+      </div>
       <div style="margin-top: 60px; display: flex; justify-content: space-between; padding: 0 40px;">
         <div style="text-align: center; width: 250px;">
           <div style="border-bottom: 1px solid #333; margin-bottom: 5px; height: 40px;"></div>
@@ -6158,22 +6285,21 @@
           <strong>Date</strong>
         </div>
       </div>
-
       <div class="footer">
         <p>This document is confidential and intended for medical use only.</p>
         <p>${escapeHtml(hospitalConfig.name)} - Clinic Management System</p>
       </div>
+      <script>window.onload = function(){ window.print(); }</script>
     </body>
     </html>
   `);
       printWindow.document.close();
-      printWindow.print();
     }
 
     function editPatient() {
       if (!currentPatientId) return;
 
-      const patient = currentPatientsList.find(p => p.PatientID === currentPatientId);
+      const patient = currentPatientsList.find(p => String(p.PatientID) === String(currentPatientId));
       if (!patient) {
         showToast('Patient not found');
         return;
@@ -6215,12 +6341,13 @@
           return;
         }
 
+        const currentUserId = window.currentUser?.id;
         tbody.innerHTML = users.map(u => `
       <tr style="border-bottom:1px solid var(--gray-200);">
         <td style="padding:12px 10px;font-weight:600;color:var(--gray-800);">${u.name}</td>
         <td style="padding:12px 10px;font-size:13px;color:var(--gray-600);">${u.email}</td>
         <td style="padding:12px 10px;">
-          <select style="padding:6px;border:1px solid var(--gray-300);border-radius:4px;font-size:12px;" onchange="updateUserRole(${u.id}, this.value)" ${u.id === window.currentUser.id ? 'disabled' : ''}>
+          <select style="padding:6px;border:1px solid var(--gray-300);border-radius:4px;font-size:12px;" onchange="updateUserRole(${u.id}, this.value)" ${u.id === currentUserId ? 'disabled' : ''}>
             <option value="Pending" ${u.role === 'Pending' ? 'selected' : ''}>Pending</option>
             <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin</option>
             <option value="Doctor" ${u.role === 'Doctor' ? 'selected' : ''}>Doctor</option>
@@ -6229,7 +6356,7 @@
           </select>
         </td>
         <td style="padding:12px 10px;">
-          <select style="padding:6px;border:1px solid var(--gray-300);border-radius:4px;font-size:12px;" onchange="updateUserStatus(${u.id}, this.value)" ${u.id === window.currentUser.id ? 'disabled' : ''}>
+          <select style="padding:6px;border:1px solid var(--gray-300);border-radius:4px;font-size:12px;" onchange="updateUserStatus(${u.id}, this.value)" ${u.id === currentUserId ? 'disabled' : ''}>
             <option value="Pending" ${u.status === 'Pending' ? 'selected' : ''}>Pending</option>
             <option value="Active" ${u.status === 'Active' ? 'selected' : ''}>Active</option>
             <option value="Suspended" ${u.status === 'Suspended' ? 'selected' : ''}>Suspended</option>
@@ -6237,8 +6364,8 @@
         </td>
         <td style="padding:12px 10px;font-size:12px;color:var(--gray-500);">${new Date(u.createdAt).toLocaleDateString()}</td>
         <td style="padding:12px 10px;">
-          ${u.id !== window.currentUser.id ? `
-            <button onclick="deleteUser(${u.id}, '${u.name}')" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:4px;cursor:pointer;padding:4px 10px;font-size:12px;font-weight:bold;" title="Delete User">
+          ${u.id !== currentUserId ? `
+            <button onclick="deleteUser(${u.id}, ${JSON.stringify(u.name)})" style="background:transparent;border:1px solid var(--red);color:var(--red);border-radius:4px;cursor:pointer;padding:4px 10px;font-size:12px;font-weight:bold;" title="Delete User">
               <i class="ti ti-trash" style="margin-right:4px;"></i>Delete
             </button>
           ` : '<span style="color:var(--gray-400);font-size:11px;font-weight:600;">(Current User)</span>'}
@@ -6271,6 +6398,7 @@
           body: { role: newRole }
         });
         showToast('User role updated');
+        loadUsers();
       } catch (err) {
         alert(`Error updating user role: ${err.message}`);
         loadUsers();
@@ -6284,6 +6412,7 @@
           body: { status: newStatus }
         });
         showToast('User status updated');
+        loadUsers();
       } catch (err) {
         alert(`Error updating user status: ${err.message}`);
         loadUsers();
