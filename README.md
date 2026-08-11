@@ -1,4 +1,4 @@
-# MedClinic Pro
+# SaloneCare
 
 A comprehensive clinic management system with patient records, appointments, staff management, inventory tracking, vaccinations, and prescription management. Built with Node.js, Express, and SQLite.
 
@@ -45,7 +45,7 @@ A comprehensive clinic management system with patient records, appointments, sta
 1. **Clone the repository**
 ```bash
 git clone <repository-url>
-cd MedClinic Pro
+cd SaloneCare
 ```
 
 2. **Install dependencies**

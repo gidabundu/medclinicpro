@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MedClinic Pro - Clinic Management</title>
+  <title>SaloneCare - Clinic Management</title>
   <link rel="stylesheet" href="https://unpkg.com/@tabler/icons-webfont@latest/tabler-icons.min.css">
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"
     onerror="window._qrCdnFailed=true;loadFallbackQR()"></script>
@@ -2785,7 +2785,7 @@
           <i id="sidebarLogoIcon" class="ti ti-medical-cross"></i>
         </div>
         <div class="brand-text">
-          <div class="brand-name" id="sidebarHospitalName">MedClinic Pro</div>
+          <div class="brand-name" id="sidebarHospitalName">SaloneCare</div>
           <div class="brand-sub">Clinic Management</div>
         </div>
       </div>
@@ -3306,7 +3306,7 @@
                 <i id="hospitalLogoIcon" class="ti ti-hospital" style="font-size:32px;color:var(--navy)"></i>
               </div>
               <div class="hospital-info">
-                <div class="hospital-name" id="hospitalName">MedClinic General Hospital</div>
+                <div class="hospital-name" id="hospitalName">SaloneCare General Hospital</div>
                 <div class="hospital-address" id="hospitalAddress">123 Medical Center Drive</div>
               </div>
             </div>
@@ -3767,7 +3767,7 @@
         <button class="qr-close" onclick="closeQR()"><i class="ti ti-x" style="font-size:14px"></i></button>
         <div class="qr-header-icon"><i class="ti ti-device-mobile"></i></div>
         <div class="qr-title">Open on your phone</div>
-        <div class="qr-sub">Scan this QR code with your phone camera to access MedClinic Pro instantly.</div>
+        <div class="qr-sub">Scan this QR code with your phone camera to access SaloneCare instantly.</div>
         <div class="qr-box">
           <div class="qr-corner tl"></div>
           <div class="qr-corner tr"></div>
@@ -3778,7 +3778,7 @@
         </div>
         <div class="qr-url-row" onclick="copyURL()">
           <i class="ti ti-link" style="font-size:16px;color:var(--gray-400)"></i>
-          <div class="qr-url-text" id="qrUrlText">medclinicpro.app/access</div>
+          <div class="qr-url-text" id="qrUrlText">salonecare.app/access</div>
           <i class="ti ti-copy" style="font-size:15px;color:var(--gray-400)"></i>
         </div>
         <div class="qr-divider">
@@ -4111,7 +4111,7 @@
           <i id="hospitalLogoIconModal" class="ti ti-hospital" style="font-size:24px;color:var(--navy)"></i>
         </div>
         <div class="hospital-info-modal">
-          <div class="hospital-name-modal" id="hospitalNameModal">MedClinic General Hospital</div>
+          <div class="hospital-name-modal" id="hospitalNameModal">SaloneCare General Hospital</div>
         </div>
       </div>
       <div class="modal-header">
@@ -5803,7 +5803,7 @@
       }
 
       // Load saved settings from localStorage
-      const settings = JSON.parse(localStorage.getItem('medclinic_settings') || '{}');
+      const settings = JSON.parse(localStorage.getItem('salonecare_settings') || '{}');
       if (settings.darkMode) document.getElementById('darkModeToggle').classList.add('active');
       if (settings.compactView) document.getElementById('compactViewToggle').classList.add('active');
       if (settings.emailNotif === false) document.getElementById('emailNotifToggle').classList.remove('active');
@@ -5851,7 +5851,7 @@
         displayName: document.getElementById('settingsName').value.trim()
       };
 
-      localStorage.setItem('medclinic_settings', JSON.stringify(settings));
+      localStorage.setItem('salonecare_settings', JSON.stringify(settings));
 
       // Apply dark mode
       if (settings.darkMode) {
@@ -5899,7 +5899,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `medclinic-export-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `salonecare-export-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
 
