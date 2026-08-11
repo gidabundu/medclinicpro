@@ -266,7 +266,7 @@ Get all staff members (requires authentication).
     "StaffID": 1,
     "StaffName": "Dr. Aris Thorne",
     "Role": "Doctor",
-    "Email": "aris.thorne@medclinic.com",
+    "Email": "aris.thorne@salonecare.com",
     "Phone": "+123456780",
     "CreatedAt": "2024-01-01 00:00:00"
   }
@@ -281,7 +281,7 @@ Add a new staff member (requires authentication).
 {
   "StaffName": "Dr. Robert Carter",
   "Role": "Cardiologist",
-  "Email": "robert.carter@medclinic.com",
+  "Email": "robert.carter@salonecare.com",
   "Phone": "+1122334455"
 }
 ```
@@ -741,7 +741,7 @@ The test suite:
 
 ```bash
 npm install -g pm2
-pm2 start server.js --name medclinic
+pm2 start server.js --name SaloneCare
 pm2 save
 pm2 startup
 ```
@@ -763,8 +763,8 @@ CMD ["npm", "start"]
 Build and run:
 
 ```bash
-docker build -t medclinic .
-docker run -p 3000:3000 --env-file .env medclinic
+docker build -t salonecare .
+docker run -p 3000:3000 --env-file .env salonecare
 ```
 
 ## Troubleshooting
