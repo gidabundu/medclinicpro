@@ -8,6 +8,9 @@
 </head>
 <body>
   <form id="signupForm">
+    <div class="auth-logo">
+      <img src="assets/SaloneCare.png" alt="SaloneCare Logo">
+    </div>
     <h2>Create Account</h2>
     <input type="text" id="name" placeholder="Full name">
     <input type="email" id="email" placeholder="Email" required>
@@ -20,6 +23,11 @@
     <button type="submit">Sign Up</button>
     <a href="login.html">Already have an account?</a>
   </form>
+
+  <style>
+    .auth-logo{display:flex;justify-content:center;margin-bottom:18px}
+    .auth-logo img{max-width:140px;height:auto;display:block}
+  </style>
 
   <script>
     const togglePassword = document.getElementById('togglePassword');
