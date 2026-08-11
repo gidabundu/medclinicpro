@@ -55,7 +55,7 @@
           body:JSON.stringify({name,email,password})
         });
         if(!res.ok){const err=await res.json(); alert(err.error||'Signup failed'); return;}
-        window.location.href = 'medclinic-pro.html';
+        window.location.href = 'SaloneCare.html';
       }catch(err){
         alert('Network error. Make sure the auth server is running and open this page from the server URL.');
       }
